@@ -38,20 +38,19 @@
     <style id="string"            _name="String"                map-to="def:string"/>
     <style id="keyword1"          _name="Keyword 1"             map-to="def:keyword"/>
     <style id="keyword2"          _name="Keyword 2"             map-to="def:statement"/>
+    <style id="operator"          _name="Operator"              map-to="def:operator"/>
     <style id="type"              _name="Data Type"             map-to="def:type"/>
+    <style id="special"           _name="Special"               map-to="def:special-constant"/>
     <style id="error"             _name="Error"                 map-to="def:error"/>
+    <style id="mark"              _name="Debug mark"            map-to="def:underlined"/>
   </styles>
 
   <definitions>
 
     <!--regexs-->
-    <define-regex id="identifier" extended="true">[\w_][-\w_\.0-9]*</define-regex>
-    <define-regex id="identifier-ref-arg" extended="true">(\%{identifier}:)?\%{identifier}</define-regex>
+    <define-regex id="identifier" extended="true">\b[\w_][-\w_\.0-9]*\b</define-regex>
+    <define-regex id="identifier-with-ns" extended="true">\b(\%{identifier}:)?\%{identifier}\b</define-regex>
 
-    <context id="wserror" style-ref="error">
-        <match>\s+$</match>
-    </context>
-    
     <!-- Keywords -->
     <context id="keywords1" style-ref="keyword1">
         <keyword>anyxml</keyword>
@@ -78,7 +77,7 @@
         <keyword>typedef</keyword>
         <keyword>uses</keyword>
     </context>
-    
+
     <context id="keywords2" style-ref="keyword2">
         <keyword>argument</keyword>
         <keyword>base</keyword>
@@ -118,7 +117,7 @@
         <keyword>yang-version</keyword>
         <keyword>yin-element</keyword>
     </context>
-    
+
     <context id="types" style-ref="type">
         <keyword>(u)?int(8|16|32|64)</keyword>
         <keyword>decimal64</keyword>
@@ -133,80 +132,95 @@
         <keyword>union</keyword>
         <keyword>instance-identifier</keyword>
     </context>
-    
+
+    <!-- Statements -->
+
+    <!-- description and other documentation statements -->
     <context id="doc" style-ref="doc-comment">
-        <start>description|contact|organization|reference|units</start>
-        <end>;</end>
+        <start>\b(description|contact|organization|reference|units)\b</start><end>;</end>
         <include>
             <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
+            <context ref="def:in-comment"/>
         </include>
     </context>
-    
+
+    <!-- module, submodule -->
+    <context id="module" once-only="true">
+        <start extended="true">\b(module|submodule)\s+(\%{identifier})\s*{</start>
+        <end>}</end>
+        <include>
+            <context sub-pattern="1" where="start" style-ref="keyword1"/>
+            <context sub-pattern="2" where="start" style-ref="special"/>
+            <context id="yang-version" once-only="true" style-ref="keyword2">
+                <match>\byang-version\s+1\s*;</match>
+            </context>
+            <context id="namespace" once-only="true">
+                <start>\bnamespace\b</start><end>;</end>
+                <include>
+                    <context sub-pattern="0" where="start" style-ref="keyword2"/>
+                    <context ref="string"/>
+                </include>
+            </context>
+            <context ref="common"/>
+        </include>
+    </context>
+
+    <!-- Tail-f extension -->
     <context id="tailf" style-ref="keyword2">
         <match extended="true">tailf:\%{identifier}</match>
     </context>
-    
+
+    <!-- Parameter contexts -->
+    <context id="string">
+        <include>
+            <context id="single-quoted-string" style-ref="string">
+                <start>'</start><end>'</end>
+            </context>
+            <context id="double-quoted-string" style-ref="string">
+                <start>"</start><end>[^\\]"</end>
+            </context>
+            <context id="unquoted-string" style-ref="string">
+                <match extended="true">[^'";{}+\s]+(\s+[^+;{])?</match>
+                <include>
+                    <context sub-pattern="1" style-ref="error"/>
+                </include>
+            </context>
+            <context id="concat-string" style-ref="operator">
+                <match>\+</match>
+            </context>
+        </include>
+    </context>
+
+    <!-- Other contexts -->
+    <context id="wserror" style-ref="error">
+        <match>\s+$</match>
+    </context>
+
+    <context id="stmt-error" style-ref="error">
+        <match extended="true">\%{identifier-with-ns}</match>
+    </context>
+
     <context id="common">
         <include>
             <context ref="def:c-like-comment"/>
             <context ref="def:c-like-comment-multiline"/>
             <context ref="def:c-like-close-comment-outside-comment"/>
             <context ref="doc"/>
-            <context ref="keywords1"/>
-            <context ref="keywords2"/>
-            <context ref="types"/>
             <context ref="tailf"/>
+            <context ref="stmt-error"/>
             <context ref="wserror"/>
         </include>
     </context>
-    
-    <!--Statements-->
-    <context id="stmt-block">
-        <start extended="true">\%{identifier-ref-arg}[^;]*{</start>
-        <end>}</end>
-        <include>
-            <context ref="stmts"/>
-        </include>
-    </context>
-    
-    <context id="stmt-simple">
-        <start extended="true">\%{identifier-ref-arg}</start>
-        <end>;</end>
-        <include>
-            <context ref="common"/>
-            <context id="missing-last-semicolon-in-block" style-ref="error">
-                <match>}</match>
-            </context>
-        </include>
-    </context>
-    
-    <context id="stmts">
-        <include>
-            <context ref="common"/>
-            <context ref="stmt-block"/>
-            <context ref="stmt-simple"/>
-        </include>
-    </context>
-    
-    <!--Module context-->
-    <context id="module" once-only="true">
-        <start extended="true">\b(module|submodule)\s+(\%{identifier})\s*{</start>
-        <end>}</end>
-        <include>
-            <context sub-pattern="1" where="start" style-ref="keyword1"/>
-            <context sub-pattern="2" where="start" style-ref="type"/>
-            <context ref="common"/>
-            <context ref="stmts"/>
-        </include>
-    </context>
 
-    <!--Main context-->
+    <!-- Main context -->
     <context id="yang" class="no-spell-check">
         <include>
             <context ref="def:c-like-comment"/>
             <context ref="def:c-like-comment-multiline"/>
             <context ref="def:c-like-close-comment-outside-comment"/>
             <context ref="module"/>
+            <context ref="stmt-error"/>
+            <context ref="wserror"/>
         </include>
     </context>
 

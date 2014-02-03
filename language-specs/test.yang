@@ -1,0 +1,36 @@
+module cpqd-x {
+    yang-version 1;
+    namespace "http://cpqd.com.br/yang";
+    
+    description teste;
+    prefix x;
+
+    import cpqd-y {
+        prefix y;
+    }
+
+    /* Comment */
+    container x {
+        description "TODO abc"; // Line comment FIXME 
+        leaf config {
+            type enumeration {
+                enum x;
+            }
+            tailf:info x;
+        }
+    }
+
+    list y {
+        key a;
+        leaf a {
+            type string;
+            default "the default value";
+        }
+        leaf b {
+            type leafref {
+                path "/path/to/string/leaf";
+            }
+        }
+    }
+}
+
