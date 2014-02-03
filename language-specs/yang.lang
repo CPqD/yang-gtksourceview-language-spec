@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language id="yang" _name="YANG" version="2.0" _section="Others">
+  <metadata>
+    <property name="mimetypes">application/yang</property>
+    <property name="globs">*.yang</property>
+    <property name="line-comment-start">//</property>
+    <property name="block-comment-start">/*</property>
+    <property name="block-comment-end">*/</property>
+  </metadata>
+
+  <styles>
+    <style id="comment"           _name="Comment"               map-to="def:comment"/>
+    <style id="doc-comment"       _name="Documentation comment" map-to="def:doc-comment"/>
+    <style id="doc-stmt"          _name="Documentation statement" map-to="def:doc-comment-element"/>
+    <style id="string"            _name="String"                map-to="def:string"/>
+    <style id="keyword1"          _name="Keyword 1"             map-to="def:keyword"/>
+    <style id="keyword2"          _name="Keyword 2"             map-to="def:statement"/>
+    <style id="type"              _name="Data Type"             map-to="def:type"/>
+    <style id="error"             _name="Error"                 map-to="def:error"/>
+    <style id="note"              _name="Note"                  map-to="def:note"/>
+  </styles>
+
+  <definitions>
+    <!-- Keywords -->
+    <context id="keywords1" style-ref="keyword1">
+        <keyword>anyxml</keyword>
+        <keyword>augment</keyword>
+        <keyword>case</keyword>
+        <keyword>choice</keyword>
+        <keyword>container</keyword>
+        <keyword>extension</keyword>
+        <keyword>deviate</keyword>
+        <keyword>feature</keyword>
+        <keyword>grouping</keyword>
+        <keyword>identity</keyword>
+        <keyword>import</keyword>
+        <keyword>include</keyword>
+        <keyword>input</keyword>
+        <keyword>leaf</keyword>
+        <keyword>leaf-list</keyword>
+        <keyword>list</keyword>
+        <keyword>module</keyword>
+        <keyword>notification</keyword>
+        <keyword>output</keyword>
+        <keyword>rpc</keyword>
+        <keyword>submodule</keyword>
+        <keyword>typedef</keyword>
+        <keyword>uses</keyword>
+    </context>
+
+    <context id="keywords2" style-ref="keyword2">
+        <keyword>argument</keyword>
+        <keyword>base</keyword>
+        <keyword>belongs-to</keyword>
+        <keyword>bit</keyword>
+        <keyword>config</keyword>
+        <keyword>default</keyword>
+        <keyword>enum</keyword>
+        <keyword>error-app-tag</keyword>
+        <keyword>error-message</keyword>
+        <keyword>deviation</keyword>
+        <keyword>fraction-digits</keyword>
+        <keyword>if-feature</keyword>
+        <keyword>key</keyword>
+        <keyword>length</keyword>
+        <keyword>mandatory</keyword>
+        <keyword>max-elements</keyword>
+        <keyword>min-elements</keyword>
+        <keyword>must</keyword>
+        <keyword>namespace</keyword>
+        <keyword>ordered-by</keyword>
+        <keyword>path</keyword>
+        <keyword>pattern</keyword>
+        <keyword>position</keyword>
+        <keyword>prefix</keyword>
+        <keyword>presence</keyword>
+        <keyword>range</keyword>
+        <keyword>refine</keyword>
+        <keyword>require-instance</keyword>
+        <keyword>revision</keyword>
+        <keyword>revision-date</keyword>
+        <keyword>status</keyword>
+        <keyword>type</keyword>
+        <keyword>unique</keyword>
+        <keyword>value</keyword>
+        <keyword>when</keyword>
+        <keyword>yang-version</keyword>
+        <keyword>yin-element</keyword>
+    </context>
+
+    <context id="types" style-ref="type">
+        <keyword>(u)?int(8|16|32|64)</keyword>
+        <keyword>decimal64</keyword>
+        <keyword>string</keyword>
+        <keyword>boolean</keyword>
+        <keyword>enumeration</keyword>
+        <keyword>bits</keyword>
+        <keyword>binary</keyword>
+        <keyword>leafref</keyword>
+        <keyword>identityref</keyword>
+        <keyword>empty</keyword>
+        <keyword>union</keyword>
+        <keyword>instance-identifier</keyword>
+    </context>
+
+    <context id="doc" style-ref="doc-comment">
+        <start>description|contact|organization|reference|units</start>
+        <end>;</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
+        </include>
+    </context>
+
+    <context id="tailf" style-ref="keyword2">
+        <match extended="true">tailf:[\w_][-\w_\.0-9]*</match>
+    </context>
+
+    <!--Show whitespace errors-->
+    <!--
+    <context id="wserror" style-ref="error">
+        <match>\s+$</match>
+    </context>
+    -->
+    
+    <!--Main context-->
+    <context id="yang" class="no-spell-check">
+      <include>
+        <context ref="def:c-like-comment"/>
+        <context ref="def:c-like-comment-multiline"/>
+        <context ref="def:c-like-close-comment-outside-comment"/>
+        <context ref="doc"/>
+        <context ref="keywords1"/>
+        <context ref="keywords2"/>
+        <context ref="types"/>
+        <context ref="tailf"/>
+        <!--context ref="wserror"/-->
+      </include>
+    </context>
+
+  </definitions>
+</language>
