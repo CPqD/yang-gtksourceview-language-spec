@@ -1,7 +1,7 @@
 module cpqd-x {
     yang-version 1;
     namespace "http://cpqd.com.br/yang";
-    
+
     description teste;
     prefix x;
 

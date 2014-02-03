@@ -48,8 +48,10 @@
   <definitions>
 
     <!--regexs-->
-    <define-regex id="identifier" extended="true">\b[\w_][-\w_\.0-9]*\b</define-regex>
-    <define-regex id="identifier-with-ns" extended="true">\b(\%{identifier}:)?\%{identifier}\b</define-regex>
+    <define-regex id="identifier-base" extended="true">\b[\w_][-\w_\.0-9]*\b</define-regex>
+    <define-regex id="identifier" extended="true">\b['"]?[\w_][-\w_\.0-9]*['"]?\b</define-regex>
+    <define-regex id="identifier-with-ns" extended="true">\b['"]?(\%{identifier-base}:)?\%{identifier-base}['"]?\b</define-regex>
+    <define-regex id="qualified-identifier" extended="true">\b['"]?\%{identifier-base}:\%{identifier-base}['"]?\b</define-regex>
 
     <!-- Keywords -->
     <context id="keywords1" style-ref="keyword1">
@@ -135,6 +137,16 @@
 
     <!-- Statements -->
 
+    <!-- Extensions -->
+    <context id="extensions">
+        <start extended="true">\b(\%{qualified-identifier})(\s+\%{identifier})?\s*{?</start><!--TODO string-->
+        <end>;|}</end>
+        <include>
+            <context sub-pattern="1" where="start" style-ref="keyword2"/>
+            <context ref="common"/>
+        </include>
+    </context>
+
     <!-- description and other documentation statements -->
     <context id="doc" style-ref="doc-comment">
         <start>\b(description|contact|organization|reference|units)\b</start><end>;</end>
@@ -161,13 +173,18 @@
                     <context ref="string"/>
                 </include>
             </context>
+            <context ref="prefix"/>
             <context ref="common"/>
         </include>
     </context>
 
-    <!-- Tail-f extension -->
-    <context id="tailf" style-ref="keyword2">
-        <match extended="true">tailf:\%{identifier}</match>
+    <!-- prefix -->
+    <context id="prefix" once-only="true">
+        <match extended="true">\b(prefix)\s+(\%{identifier})\s*;</match>
+        <include>
+            <context sub-pattern="1" style-ref="keyword2"/>
+            <context sub-pattern="2" style-ref="special"/>
+        </include>
     </context>
 
     <!-- Parameter contexts -->
@@ -206,7 +223,7 @@
             <context ref="def:c-like-comment-multiline"/>
             <context ref="def:c-like-close-comment-outside-comment"/>
             <context ref="doc"/>
-            <context ref="tailf"/>
+            <context ref="extensions"/>
             <context ref="stmt-error"/>
             <context ref="wserror"/>
         </include>
