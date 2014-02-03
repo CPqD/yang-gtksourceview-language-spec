@@ -1,4 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ This file is part of GtkSourceView
+
+ Authors: Marco Barisione, Emanuele Aina
+ Copyright (C) 2005-2007 Marco Barisione <barisione@gmail.com>
+ Copyright (C) 2005-2007 Emanuele Aina
+
+ GtkSourceView is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ GtkSourceView is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+-->
 <language id="yang" _name="YANG" version="2.0" _section="Others">
   <metadata>
     <property name="mimetypes">application/yang</property>
@@ -17,10 +40,18 @@
     <style id="keyword2"          _name="Keyword 2"             map-to="def:statement"/>
     <style id="type"              _name="Data Type"             map-to="def:type"/>
     <style id="error"             _name="Error"                 map-to="def:error"/>
-    <style id="note"              _name="Note"                  map-to="def:note"/>
   </styles>
 
   <definitions>
+
+    <!--regexs-->
+    <define-regex id="identifier" extended="true">[\w_][-\w_\.0-9]*</define-regex>
+    <define-regex id="identifier-ref-arg" extended="true">(\%{identifier}:)?\%{identifier}</define-regex>
+
+    <context id="wserror" style-ref="error">
+        <match>\s+$</match>
+    </context>
+    
     <!-- Keywords -->
     <context id="keywords1" style-ref="keyword1">
         <keyword>anyxml</keyword>
@@ -47,7 +78,7 @@
         <keyword>typedef</keyword>
         <keyword>uses</keyword>
     </context>
-
+    
     <context id="keywords2" style-ref="keyword2">
         <keyword>argument</keyword>
         <keyword>base</keyword>
@@ -87,7 +118,7 @@
         <keyword>yang-version</keyword>
         <keyword>yin-element</keyword>
     </context>
-
+    
     <context id="types" style-ref="type">
         <keyword>(u)?int(8|16|32|64)</keyword>
         <keyword>decimal64</keyword>
@@ -102,7 +133,7 @@
         <keyword>union</keyword>
         <keyword>instance-identifier</keyword>
     </context>
-
+    
     <context id="doc" style-ref="doc-comment">
         <start>description|contact|organization|reference|units</start>
         <end>;</end>
@@ -110,31 +141,73 @@
             <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
         </include>
     </context>
-
-    <context id="tailf" style-ref="keyword2">
-        <match extended="true">tailf:[\w_][-\w_\.0-9]*</match>
-    </context>
-
-    <!--Show whitespace errors-->
-    <!--
-    <context id="wserror" style-ref="error">
-        <match>\s+$</match>
-    </context>
-    -->
     
+    <context id="tailf" style-ref="keyword2">
+        <match extended="true">tailf:\%{identifier}</match>
+    </context>
+    
+    <context id="common">
+        <include>
+            <context ref="def:c-like-comment"/>
+            <context ref="def:c-like-comment-multiline"/>
+            <context ref="def:c-like-close-comment-outside-comment"/>
+            <context ref="doc"/>
+            <context ref="keywords1"/>
+            <context ref="keywords2"/>
+            <context ref="types"/>
+            <context ref="tailf"/>
+            <context ref="wserror"/>
+        </include>
+    </context>
+    
+    <!--Statements-->
+    <context id="stmt-block">
+        <start extended="true">\%{identifier-ref-arg}[^;]*{</start>
+        <end>}</end>
+        <include>
+            <context ref="stmts"/>
+        </include>
+    </context>
+    
+    <context id="stmt-simple">
+        <start extended="true">\%{identifier-ref-arg}</start>
+        <end>;</end>
+        <include>
+            <context ref="common"/>
+            <context id="missing-last-semicolon-in-block" style-ref="error">
+                <match>}</match>
+            </context>
+        </include>
+    </context>
+    
+    <context id="stmts">
+        <include>
+            <context ref="common"/>
+            <context ref="stmt-block"/>
+            <context ref="stmt-simple"/>
+        </include>
+    </context>
+    
+    <!--Module context-->
+    <context id="module" once-only="true">
+        <start extended="true">\b(module|submodule)\s+(\%{identifier})\s*{</start>
+        <end>}</end>
+        <include>
+            <context sub-pattern="1" where="start" style-ref="keyword1"/>
+            <context sub-pattern="2" where="start" style-ref="type"/>
+            <context ref="common"/>
+            <context ref="stmts"/>
+        </include>
+    </context>
+
     <!--Main context-->
     <context id="yang" class="no-spell-check">
-      <include>
-        <context ref="def:c-like-comment"/>
-        <context ref="def:c-like-comment-multiline"/>
-        <context ref="def:c-like-close-comment-outside-comment"/>
-        <context ref="doc"/>
-        <context ref="keywords1"/>
-        <context ref="keywords2"/>
-        <context ref="types"/>
-        <context ref="tailf"/>
-        <!--context ref="wserror"/-->
-      </include>
+        <include>
+            <context ref="def:c-like-comment"/>
+            <context ref="def:c-like-comment-multiline"/>
+            <context ref="def:c-like-close-comment-outside-comment"/>
+            <context ref="module"/>
+        </include>
     </context>
 
   </definitions>
