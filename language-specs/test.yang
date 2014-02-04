@@ -9,12 +9,12 @@ module cpqd-x {
         prefix y;
     }
     import cpqd-z {
-        prefix z;
+        prefix "z";
         revision-date 2014-02-04;
     }
 
     include submodule;
-    include submodule2 {
+    include submodule2
         revision-date 2014-02-04;
     }
 

@@ -49,8 +49,8 @@
   <definitions>
 
     <!-- Common regular expressions -->
-    <define-regex id="identifier-base" extended="true">\b[\w_][-\w_\.0-9]*\b</define-regex>
-    <define-regex id="identifier" extended="true">\b['"]?[\w_][-\w_\.0-9]*['"]?\b</define-regex>
+    <define-regex id="identifier-base" extended="true">[\w_][-\w_\.0-9]*</define-regex>
+    <define-regex id="identifier" extended="true">['"]?\b\%{identifier-base}\b['"]?</define-regex>
     <define-regex id="identifier-with-ns" extended="true">\b['"]?(\%{identifier-base}:)?\%{identifier-base}['"]?\b</define-regex>
     <define-regex id="qualified-identifier" extended="true">\b['"]?\%{identifier-base}:\%{identifier-base}['"]?\b</define-regex>
     <define-regex id="date" extended="true">\b[0-9]{4}-[01][0-9]-[0-3][0-9]\b</define-regex>
@@ -87,10 +87,10 @@
                 </include>
             </context>
             <context id="extension-block">
-                <start extended="true">\b(\%{extension})(\s+[^;{]+)?{</start>
+                <start extended="true">\%{extension}</start>
                 <end>}</end>
                 <include>
-                    <context sub-pattern="1" where="start" style-ref="keyword2"/>
+                    <context sub-pattern="0" where="start" style-ref="keyword2"/>
                     <context ref="common"/>
                 </include>
             </context>
@@ -115,7 +115,7 @@
 
     <!-- Module, submodule, import and include statements -->
     <context id="module" once-only="true"> <!-- 7.1, 7.2 -->
-        <start extended="true">\b(module|submodule)\s+(\%{identifier})\s*{</start>
+        <start extended="true">\b(module|submodule)\s+(\%{identifier})</start>
         <end>}</end>
         <include>
             <context sub-pattern="1" where="start" style-ref="keyword1"/>
@@ -157,7 +157,7 @@
     </context>
 
     <context id="import"> <!-- 7.1.5 -->
-        <start extended="true">\b(import)\s+(\%{identifier})\s*{</start>
+        <start extended="true">\b(import)\s+(\%{identifier})</start>
         <end>}</end>
         <include>
             <context sub-pattern="1" where="start" style-ref="keyword1"/>
@@ -177,7 +177,7 @@
             </include>
         </context>
         <context id="include-block">
-            <start extended="true">\b(include)\s+(\%{identifier})\s*{</start>
+            <start extended="true">\b(include)\s+(\%{identifier})</start>
             <end>}</end>
             <include>
                 <context sub-pattern="1" where="start" style-ref="keyword1"/>
@@ -197,7 +197,7 @@
             </include>
         </context>
         <context id="revision-block">
-            <start extended="true">\b(revision)\s+(\%{date})\s*{</start>
+            <start extended="true">\b(revision)\s+(\%{date})</start>
             <end>}</end>
             <include>
                 <context sub-pattern="1" where="start" style-ref="keyword1"/>
@@ -209,7 +209,7 @@
     </include></context>
 
     <context id="belongs-to"><!-- 7.2.2 -->
-        <start extended="true">\b(belongs-to)\s+(\%{identifier})\s*{</start>
+        <start extended="true">\b(belongs-to)\s+(\%{identifier})</start>
         <end>}</end>
         <include>
             <context sub-pattern="1" where="start" style-ref="keyword1"/>
