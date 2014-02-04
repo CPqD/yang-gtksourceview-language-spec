@@ -36,6 +36,7 @@
     <style id="doc-comment"       _name="Documentation comment" map-to="def:doc-comment"/>
     <style id="doc-stmt"          _name="Documentation statement" map-to="def:doc-comment-element"/>
     <style id="string"            _name="String"                map-to="def:string"/>
+    <style id="number"            _name="Number"                map-to="def:number"/>
     <style id="keyword1"          _name="Keyword 1"             map-to="def:keyword"/>
     <style id="keyword2"          _name="Keyword 2"             map-to="def:statement"/>
     <style id="operator"          _name="Operator"              map-to="def:operator"/>
@@ -52,78 +53,13 @@
     <define-regex id="identifier" extended="true">\b['"]?[\w_][-\w_\.0-9]*['"]?\b</define-regex>
     <define-regex id="identifier-with-ns" extended="true">\b['"]?(\%{identifier-base}:)?\%{identifier-base}['"]?\b</define-regex>
     <define-regex id="qualified-identifier" extended="true">\b['"]?\%{identifier-base}:\%{identifier-base}['"]?\b</define-regex>
+    <define-regex id="date" extended="true">\b[0-9]{4}-[01][0-9]-[0-3][0-9]\b</define-regex>
 
     <!-- Comment the first line and uncomment the second to accept unknown statements -->
     <define-regex id="extension" extended="true">\%{qualified-identifier}</define-regex>
     <!--define-regex id="extension" extended="true">\%{identifier-with-ns}</define-regex-->
 
-    <!-- Keywords -->
-    <context id="keywords1" style-ref="keyword1">
-        <keyword>anyxml</keyword>
-        <keyword>augment</keyword>
-        <keyword>case</keyword>
-        <keyword>choice</keyword>
-        <keyword>container</keyword>
-        <keyword>extension</keyword>
-        <keyword>deviate</keyword>
-        <keyword>feature</keyword>
-        <keyword>grouping</keyword>
-        <keyword>identity</keyword>
-        <keyword>import</keyword>
-        <keyword>include</keyword>
-        <keyword>input</keyword>
-        <keyword>leaf</keyword>
-        <keyword>leaf-list</keyword>
-        <keyword>list</keyword>
-        <keyword>module</keyword>
-        <keyword>notification</keyword>
-        <keyword>output</keyword>
-        <keyword>rpc</keyword>
-        <keyword>submodule</keyword>
-        <keyword>typedef</keyword>
-        <keyword>uses</keyword>
-    </context>
-
-    <context id="keywords2" style-ref="keyword2">
-        <keyword>argument</keyword>
-        <keyword>base</keyword>
-        <keyword>belongs-to</keyword>
-        <keyword>bit</keyword>
-        <keyword>config</keyword>
-        <keyword>default</keyword>
-        <keyword>enum</keyword>
-        <keyword>error-app-tag</keyword>
-        <keyword>error-message</keyword>
-        <keyword>deviation</keyword>
-        <keyword>fraction-digits</keyword>
-        <keyword>if-feature</keyword>
-        <keyword>key</keyword>
-        <keyword>length</keyword>
-        <keyword>mandatory</keyword>
-        <keyword>max-elements</keyword>
-        <keyword>min-elements</keyword>
-        <keyword>must</keyword>
-        <keyword>namespace</keyword>
-        <keyword>ordered-by</keyword>
-        <keyword>path</keyword>
-        <keyword>pattern</keyword>
-        <keyword>position</keyword>
-        <keyword>prefix</keyword>
-        <keyword>presence</keyword>
-        <keyword>range</keyword>
-        <keyword>refine</keyword>
-        <keyword>require-instance</keyword>
-        <keyword>revision</keyword>
-        <keyword>revision-date</keyword>
-        <keyword>status</keyword>
-        <keyword>type</keyword>
-        <keyword>unique</keyword>
-        <keyword>value</keyword>
-        <keyword>when</keyword>
-        <keyword>yang-version</keyword>
-        <keyword>yin-element</keyword>
-    </context>
-
+    <!-- Built-in types -->
     <context id="types" style-ref="type">
         <keyword>(u)?int(8|16|32|64)</keyword>
         <keyword>decimal64</keyword>
@@ -161,26 +97,33 @@
         </include>
     </context>
 
-    <!-- description and other documentation statements -->
+    <!-- Documentation statements -->
     <context id="doc" style-ref="doc-comment">
-        <start>\b(description|contact|organization|reference|units)\b</start><end>;</end>
+        <start>\b(description|reference|units)\b</start><end>;</end>
         <include>
             <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
-            <context ref="def:in-comment"/>
+            <context ref="string"/>
+        </include>
+    </context>
+    <context id="module-doc" style-ref="doc-comment"> <!-- 7.1.7, 7.1.8 -->
+        <start>\b(description|contact|organization|reference)\b</start><end>;</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
+            <context ref="string"/>
         </include>
     </context>
 
-    <!-- module, submodule -->
-    <context id="module" once-only="true">
+    <!-- Module, submodule, import and include statements -->
+    <context id="module" once-only="true"> <!-- 7.1, 7.2 -->
         <start extended="true">\b(module|submodule)\s+(\%{identifier})\s*{</start>
         <end>}</end>
         <include>
             <context sub-pattern="1" where="start" style-ref="keyword1"/>
             <context sub-pattern="2" where="start" style-ref="special"/>
-            <context id="yang-version" once-only="true" style-ref="keyword2">
+            <context id="yang-version" once-only="true" style-ref="keyword2"> <!-- 7.1.2 -->
                 <match>\byang-version\s+1\s*;</match>
             </context>
-            <context id="namespace" once-only="true">
+            <context id="namespace" once-only="true"> <!-- 7.1.3 -->
                 <start>\bnamespace\b</start><end>;</end>
                 <include>
                     <context sub-pattern="0" where="start" style-ref="keyword2"/>
@@ -188,16 +131,91 @@
                 </include>
             </context>
             <context ref="prefix"/>
+            <context ref="import"/>
+            <context ref="include"/>
+            <context ref="revision"/>
+            <context ref="belongs-to"/>
+            <context ref="module-doc"/>
             <context ref="common"/>
         </include>
     </context>
 
-    <!-- prefix -->
-    <context id="prefix" once-only="true">
+    <context id="prefix" once-only="true"> <!-- 7.1.4 -->
         <match extended="true">\b(prefix)\s+(\%{identifier})\s*;</match>
         <include>
             <context sub-pattern="1" style-ref="keyword2"/>
             <context sub-pattern="2" style-ref="special"/>
+        </include>
+    </context>
+
+    <context id="revision-date" once-only="true"> <!-- 7.1.5.1 -->
+        <match>\b(revision-date)\s+(\%{date})\s*;</match>
+        <include>
+            <context sub-pattern="1" style-ref="keyword2"/>
+            <context sub-pattern="2" style-ref="number"/>
+        </include>
+    </context>
+
+    <context id="import"> <!-- 7.1.5 -->
+        <start extended="true">\b(import)\s+(\%{identifier})\s*{</start>
+        <end>}</end>
+        <include>
+            <context sub-pattern="1" where="start" style-ref="keyword1"/>
+            <context sub-pattern="2" where="start" style-ref="special"/>
+            <context ref="prefix"/>
+            <context ref="revision-date"/>
+            <context ref="common"/>
+        </include>
+    </context>
+
+    <context id="include"><include> <!-- 7.1.6 -->
+        <context id="include-simple">
+            <match extended="true">\b(include)\s+(\%{identifier})\s*;</match>
+            <include>
+                <context sub-pattern="1" style-ref="keyword1"/>
+                <context sub-pattern="2" style-ref="special"/>
+            </include>
+        </context>
+        <context id="include-block">
+            <start extended="true">\b(include)\s+(\%{identifier})\s*{</start>
+            <end>}</end>
+            <include>
+                <context sub-pattern="1" where="start" style-ref="keyword1"/>
+                <context sub-pattern="2" where="start" style-ref="special"/>
+                <context ref="revision-date"/>
+                <context ref="common"/>
+            </include>
+        </context>
+    </include></context>
+
+    <context id="revision"><include> <!-- 7.1.9 -->
+        <context id="revision-simple">
+            <match extended="true">\b(revision)\s+(\%{date})\s*;</match>
+            <include>
+                <context sub-pattern="1" style-ref="keyword1"/>
+                <context sub-pattern="2" style-ref="number"/>
+            </include>
+        </context>
+        <context id="revision-block">
+            <start extended="true">\b(revision)\s+(\%{date})\s*{</start>
+            <end>}</end>
+            <include>
+                <context sub-pattern="1" where="start" style-ref="keyword1"/>
+                <context sub-pattern="2" where="start" style-ref="number"/>
+                <context ref="doc"/>
+                <context ref="common"/>
+            </include>
+        </context>
+    </include></context>
+
+    <context id="belongs-to"><!-- 7.2.2 -->
+        <start extended="true">\b(belongs-to)\s+(\%{identifier})\s*{</start>
+        <end>}</end>
+        <include>
+            <context sub-pattern="1" where="start" style-ref="keyword1"/>
+            <context sub-pattern="2" where="start" style-ref="special"/>
+            <context ref="prefix"/>
+            <context ref="common"/>
         </include>
     </context>
 
@@ -206,9 +224,11 @@
         <include>
             <context id="single-quoted-string" style-ref="string">
                 <start>'</start><end>'</end>
+                <include><context ref="def:in-comment"/></include>
             </context>
             <context id="double-quoted-string" style-ref="string">
-                <start>"</start><end>[^\\]"</end>
+                <start>"</start><end>(?&lt;!\\)"</end>
+                <include><context ref="def:in-comment"/></include>
             </context>
             <context id="unquoted-string" style-ref="string">
                 <match extended="true">[^'";{}+\s]+(\s+[^+;{])?</match>
@@ -219,6 +239,10 @@
             <context id="concat-string" style-ref="operator">
                 <match>\+</match>
             </context>
+            <context ref="def:c-like-comment"/>
+            <context ref="def:c-like-comment-multiline"/>
+            <context ref="def:c-like-close-comment-outside-comment"/>
+            <context ref="wserror"/>
         </include>
     </context>
 
@@ -236,7 +260,6 @@
             <context ref="def:c-like-comment"/>
             <context ref="def:c-like-comment-multiline"/>
             <context ref="def:c-like-close-comment-outside-comment"/>
-            <context ref="doc"/>
             <context ref="extensions"/>
             <context ref="stmt-error"/>
             <context ref="wserror"/>

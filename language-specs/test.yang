@@ -8,6 +8,20 @@ module cpqd-x {
     import cpqd-y {
         prefix y;
     }
+    import cpqd-z {
+        prefix z;
+        revision-date 2014-02-04;
+    }
+
+    include submodule;
+    include submodule2 {
+        revision-date 2014-02-04;
+    }
+
+    revision 2014-02-04 {
+        description "Versão mais nova";
+    }
+    revision 2014-01-30;
 
     /* Comment */
     container x {
