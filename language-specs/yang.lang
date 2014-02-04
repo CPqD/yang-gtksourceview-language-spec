@@ -98,8 +98,8 @@
     </context>
 
     <!-- Documentation statements -->
-    <context id="doc" style-ref="doc-comment">
-        <start>\b(description|reference|units)\b</start><end>;</end>
+    <context id="doc" style-ref="doc-comment"> <!-- 7.19.2, 7.19.3, 7.19.4 -->
+        <start>\b(description|reference|status)\b</start><end>;</end>
         <include>
             <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
             <context ref="string"/>
@@ -109,6 +109,20 @@
         <start>\b(description|contact|organization|reference)\b</start><end>;</end>
         <include>
             <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
+            <context ref="string"/>
+        </include>
+    </context>
+    <context id="units"> <!-- 7.3.3 -->
+        <start>\bunits\b</start><end>;</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="doc-stmt"/>
+            <context ref="string"/>
+        </include>
+    </context>
+    <context id="error-msg"> <!-- 7.5.4.1, 7.5.4.2 -->
+        <start>\b(error-message|error-app-tag)\b</start><end>;</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="keyword2"/>
             <context ref="string"/>
         </include>
     </context>
@@ -136,6 +150,7 @@
             <context ref="revision"/>
             <context ref="belongs-to"/>
             <context ref="module-doc"/>
+            <context ref="typedef"/>
             <context ref="common"/>
         </include>
     </context>
@@ -192,7 +207,7 @@
         <context id="revision-simple">
             <match extended="true">\b(revision)\s+(\%{date})\s*;</match>
             <include>
-                <context sub-pattern="1" style-ref="keyword1"/>
+                <context sub-pattern="1" style-ref="keyword2"/>
                 <context sub-pattern="2" style-ref="number"/>
             </include>
         </context>
@@ -200,7 +215,7 @@
             <start extended="true">\b(revision)\s+(\%{date})</start>
             <end>}</end>
             <include>
-                <context sub-pattern="1" where="start" style-ref="keyword1"/>
+                <context sub-pattern="1" where="start" style-ref="keyword2"/>
                 <context sub-pattern="2" where="start" style-ref="number"/>
                 <context ref="doc"/>
                 <context ref="common"/>
@@ -212,12 +227,104 @@
         <start extended="true">\b(belongs-to)\s+(\%{identifier})</start>
         <end>}</end>
         <include>
-            <context sub-pattern="1" where="start" style-ref="keyword1"/>
+            <context sub-pattern="1" where="start" style-ref="keyword2"/>
             <context sub-pattern="2" where="start" style-ref="special"/>
             <context ref="prefix"/>
             <context ref="common"/>
         </include>
     </context>
+    
+    <!-- Type statements -->
+    <context id="type-common">
+        <include>
+            <context ref="type"/>
+            <context ref="units"/>
+            <context id="default">
+                <start>\bdefault\b</start><end>;</end>
+                <include>
+                    <context sub-pattern="0" where="start" style-ref="keyword2"/>
+                    <context ref="string"/>
+                </include>
+            </context>
+        </include>
+    </context>
+
+    <context id="typedef"><!-- 7.3 -->
+        <start extended="true">\b(typedef)\s+(\%{identifier})</start>
+        <end>}</end>
+        <include>
+            <context sub-pattern="1" where="start" style-ref="keyword1"/>
+            <context sub-pattern="2" where="start" style-ref="special"/>
+            <context ref="type-common"/>
+            <context ref="doc"/>
+            <context ref="common"/>
+        </include>
+    </context>
+
+    <context id="type"><include> <!-- 7.4 -->
+        <context id="type-simple">
+            <start extended="true">\btype(?=\s+\%{identifier}\s*;)</start><end>;</end>
+            <include>
+                <context sub-pattern="0" where="start" style-ref="keyword2"/>
+                <context ref="types"/>
+            </include>
+        </context>
+        <context id="type-block">
+            <start extended="true">\btype(?=\s+\%{identifier})</start><end>}</end>
+            <include>
+                <context sub-pattern="0" where="start" style-ref="keyword2"/>
+                <context id="type-block-name" style-ref="special">
+                    <start>\s+</start><end>(?={)</end>
+                    <include><context ref="types"/></include>
+                </context>
+                <context id="type-block-substatements">
+                    <start>{</start><end>(?=})</end>
+                    <include>
+                        <context ref="type"/>
+                        <context ref="type-properties"/>
+                        <context ref="common"/>
+                    </include>
+                </context>
+                <context ref="common"/>
+            </include>
+        </context>
+    </include></context>
+
+    <context id="type-properties"><include> <!-- 9.x -->
+        <context id="type-properties-simple">
+            <start extended="true">\b(base|bit|enum|length|path|pattern|range|require-instance)(?=[^;{}]*;)</start><end>;</end>
+            <include>
+                <context sub-pattern="0" where="start" style-ref="keyword2"/>
+                <context ref="string"/>
+            </include>
+        </context>
+        <context id="type-properties-block">
+            <start extended="true">\b(base|bit|enum|length|path|pattern|range|require-instance)(?=[^;{}]*{)</start><end>}</end>
+            <include>
+                <context sub-pattern="0" where="start" style-ref="keyword2"/>
+                <context id="type-properties-block-name">
+                    <start>\s+</start><end>(?={)</end>
+                    <include><context ref="string"/></include>
+                </context>
+                <context id="type-properties-block-substatements">
+                    <start>{</start><end>(?=})</end>
+                    <include>
+                        <context id="position"> <!-- 9.7.4.2 -->
+                            <match extended="true">\b(position)\s+(\d+)\s*;</match>
+                            <include>
+                                <context sub-pattern="1" style-ref="keyword2"/>
+                                <context sub-pattern="2" style-ref="number"/>
+                            </include>
+                        </context>
+                        <context ref="error-msg"/>
+                        <context ref="doc"/>
+                        <context ref="common"/>
+                    </include>
+                </context>
+                <context ref="common"/>
+            </include>
+        </context>
+    </include></context>
 
     <!-- Parameter contexts -->
     <context id="string">

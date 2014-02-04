@@ -23,6 +23,24 @@ module cpqd-x {
     }
     revision 2014-01-30;
 
+    typedef valores {
+        type enumeration {
+            enum um;
+            enum dois;
+        }
+    }
+
+    typedef tipo {
+        type texto {
+            type string;
+            pattern ".*" {
+                error-message "that's impossible!";
+            }
+        }
+        default "";
+        units "chars";
+    }
+
     /* Comment */
     container x {
         description "TODO abc"; // Line comment FIXME 
