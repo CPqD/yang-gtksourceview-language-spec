@@ -47,11 +47,15 @@
 
   <definitions>
 
-    <!--regexs-->
+    <!-- Common regular expressions -->
     <define-regex id="identifier-base" extended="true">\b[\w_][-\w_\.0-9]*\b</define-regex>
     <define-regex id="identifier" extended="true">\b['"]?[\w_][-\w_\.0-9]*['"]?\b</define-regex>
     <define-regex id="identifier-with-ns" extended="true">\b['"]?(\%{identifier-base}:)?\%{identifier-base}['"]?\b</define-regex>
     <define-regex id="qualified-identifier" extended="true">\b['"]?\%{identifier-base}:\%{identifier-base}['"]?\b</define-regex>
+
+    <!-- Comment the first line and uncomment the second to accept unknown statements -->
+    <define-regex id="extension" extended="true">\%{qualified-identifier}</define-regex>
+    <!--define-regex id="extension" extended="true">\%{identifier-with-ns}</define-regex-->
 
     <!-- Keywords -->
     <context id="keywords1" style-ref="keyword1">
@@ -139,11 +143,21 @@
 
     <!-- Extensions -->
     <context id="extensions">
-        <start extended="true">\b(\%{qualified-identifier})(\s+\%{identifier})?\s*{?</start><!--TODO string-->
-        <end>;|}</end>
         <include>
-            <context sub-pattern="1" where="start" style-ref="keyword2"/>
-            <context ref="common"/>
+            <context id="extension-simple">
+                <match extended="true">\b(\%{extension})(\s+[^;{]+)?;</match>
+                <include>
+                    <context sub-pattern="1" style-ref="keyword2"/>
+                </include>
+            </context>
+            <context id="extension-block">
+                <start extended="true">\b(\%{extension})(\s+[^;{]+)?{</start>
+                <end>}</end>
+                <include>
+                    <context sub-pattern="1" where="start" style-ref="keyword2"/>
+                    <context ref="common"/>
+                </include>
+            </context>
         </include>
     </context>
 
