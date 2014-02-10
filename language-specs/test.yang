@@ -40,6 +40,10 @@ module cpqd-x {
         }
         default "";
         units "chars";
+
+        ns:extension argument {
+            ns:extension2 argument2;
+        }
     }
 
     /* Comment */

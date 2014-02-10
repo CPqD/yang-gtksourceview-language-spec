@@ -3,42 +3,6 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:yang="http://cpqd.com.br/yang/gtksourceview-3.0-styles">
     
-<!--
-<statement name="type" style="keyword2">
-    <argument type="multiple">
-        <argument type="ref" context="types"/>
-        <argument type="match" pattern="\%{identifier-with-ns}" style="special"/>
-    </argument>
-    <substatement name="type"/>
-    <substatement name="type-properties"/>
-</statement>
-
-<context id="type">
-    <start extended="true">\btype(?=\s+\%{identifier-with-ns})</start><end>;|}</end>
-    <include>
-        <context sub-pattern="0" where="start" style-ref="keyword2"/>
-        <context id="type-argument">
-            <start>\s+</start><end>(?=;|{)</end>
-            <include>
-                <context ref="types"/>
-                <context id="type-custom-name" style-ref="special">
-                    <match extended="true">\%{identifier-with-ns}</match>
-                </context>
-                <context ref="common"/>
-            </include>
-        </context>
-        <context id="type-substatements">
-            <start>{</start><end>(?=})</end>
-            <include>
-                <context ref="type"/>
-                <context ref="type-properties"/>
-                <context ref="common"/>
-            </include>
-        </context>
-        <context ref="common"/>
-    </include>
-</context>
--->
     <xsl:template match="yang:statement">
         <context>
             <xsl:attribute name="id"><xsl:value-of select="@name"/></xsl:attribute>
@@ -47,7 +11,7 @@
                 <xsl:when test="yang:name-pattern">(<xsl:value-of select="yang:name-pattern"/>)</xsl:when>
                 <xsl:otherwise><xsl:value-of select="@name"/></xsl:otherwise>
             </xsl:choose>\b</start>
-            <end>;|}</end> <!-- TODO exclude ; when at least a mandatory -->
+            <end><xsl:if test="not(yang:substatement[@mandatory='true'])">;|</xsl:if>}</end>
             <include>
                 <context sub-pattern="0" where="start">
                     <xsl:attribute name="style-ref"><xsl:value-of select="@style"/></xsl:attribute>
@@ -64,10 +28,11 @@
                     <start>{</start><end>(?=})</end>
                     <include>
                         <xsl:apply-templates select="yang:substatement"/>
-                        <context ref="common"/><!-- TODO extensions -->
+                        <context ref="extensions"/>
+                        <context ref="common"/>
                     </include>
                 </context>
-                <context ref="common"/><!-- TODO not extensions -->
+                <context ref="common"/>
             </include>
         </context>
     </xsl:template>
@@ -75,7 +40,7 @@
     <xsl:template match="yang:argument[@type='match']">
         <start extended="true"><xsl:value-of select="@pattern"/></start><end>(?=;|{)</end>
         <include>
-            <context ref="common"/><!-- TODO not extensions -->
+            <context ref="common"/>
         </include>
     </xsl:template>
     
@@ -108,7 +73,7 @@
             <context id="type-custom-name" style-ref="special">
                 <match extended="true">\%{identifier-with-ns}</match>
             </context>
-            <context ref="common"/><!-- TODO not extensions -->
+            <context ref="common"/>
         </include>
     </xsl:template>
     
@@ -151,43 +116,26 @@
     <define-regex id="extension" extended="true">\%{qualified-identifier}</define-regex>
     <!--define-regex id="extension" extended="true">\%{identifier-with-ns}</define-regex-->
 
-    <!-- Built-in types -->
-    <context id="types" style-ref="type">
-        <keyword>(u)?int(8|16|32|64)</keyword>
-        <keyword>decimal64</keyword>
-        <keyword>string</keyword>
-        <keyword>boolean</keyword>
-        <keyword>enumeration</keyword>
-        <keyword>bits</keyword>
-        <keyword>binary</keyword>
-        <keyword>leafref</keyword>
-        <keyword>identityref</keyword>
-        <keyword>empty</keyword>
-        <keyword>union</keyword>
-        <keyword>instance-identifier</keyword>
-    </context>
-
     <!-- Extensions -->
     <context id="extensions">
+        <start extended="true">\%{extension}</start><end>;|}</end>
         <include>
-            <context id="extension-simple">
-                <match extended="true">\b(\%{extension})(\s+[^;{]+)?;</match>
-                <include>
-                    <context sub-pattern="1" style-ref="keyword2"/>
-                </include>
+            <context sub-pattern="0" where="start" style-ref="keyword2"/>
+            <context id="extension-argument"><!-- no style for extension argument -->
+                <start>\s+</start><end>(?=;|{)</end>
             </context>
-            <context id="extension-block">
-                <start extended="true">\%{extension}</start>
-                <end>}</end>
+            <context id="extension-substatements">
+                <start>{</start><end>(?=;|})</end>
                 <include>
-                    <context sub-pattern="0" where="start" style-ref="keyword2"/>
+                    <context ref="extensions"/>
                     <context ref="common"/>
                 </include>
             </context>
+            <context ref="common"/>
         </include>
     </context>
 
-    <!-- Parameter contexts -->
+    <!-- Argument contexts -->
     <context id="string">
         <include>
             <context id="single-quoted-string" style-ref="string">
@@ -214,6 +162,21 @@
         </include>
     </context>
 
+    <context id="types" style-ref="type">
+        <keyword>(u)?int(8|16|32|64)</keyword>
+        <keyword>decimal64</keyword>
+        <keyword>string</keyword>
+        <keyword>boolean</keyword>
+        <keyword>enumeration</keyword>
+        <keyword>bits</keyword>
+        <keyword>binary</keyword>
+        <keyword>leafref</keyword>
+        <keyword>identityref</keyword>
+        <keyword>empty</keyword>
+        <keyword>union</keyword>
+        <keyword>instance-identifier</keyword>
+    </context>
+
     <!-- Other contexts -->
     <context id="wserror" style-ref="error">
         <match>\s+$</match>
@@ -228,7 +191,6 @@
             <context ref="def:c-like-comment"/>
             <context ref="def:c-like-comment-multiline"/>
             <context ref="def:c-like-close-comment-outside-comment"/>
-            <context ref="extensions"/>
             <context ref="stmt-error"/>
             <context ref="wserror"/>
         </include>
@@ -242,6 +204,7 @@
             <context sub-pattern="1" where="start" style-ref="keyword1"/>
             <context sub-pattern="2" where="start" style-ref="special"/>
             <xsl:apply-templates select="yang:top-level/yang:substatement"/>
+            <context ref="extensions"/>
             <context ref="common"/>
         </include>
     </context>
