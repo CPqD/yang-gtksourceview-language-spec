@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<yang-statements>
+    <!-- Module and submodule substatements -->
+    <top-level>
+        <substatement name="yang-version"/>
+        <substatement name="namespace" mandatory="true"/>
+        <substatement name="prefix" mandatory="true"/>
+        <substatement name="import"/>
+        <substatement name="include"/>
+        <substatement name="revision"/>
+        <substatement name="belongs-to"/>
+        <substatement name="typedef"/>
+    </top-level>
+    <statement name="yang-version" style="keyword2" once-only="true">
+        <argument type="match" pattern="1" style="number"/>
+    </statement>
+    <statement name="namespace" style="keyword2" once-only="true">
+        <argument type="ref" context="string"/>
+    </statement>
+    <statement name="prefix" style="keyword2" once-only="true">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+    </statement>
+    <statement name="revision-date" style="keyword2" once-only="true">
+        <argument type="match" pattern="\%{date}" style="number"/>
+    </statement>
+    <statement name="import" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="prefix" mandatory="true"/>
+        <substatement name="revision-date"/>
+    </statement>
+    <statement name="include" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="revision-date"/>
+    </statement>
+    <statement name="revision" style="keyword2">
+        <argument type="match" pattern="\%{date}" style="number"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="belongs-to" style="keyword1" once-only="true">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="prefix" mandatory="true"/>
+    </statement>
+    
+    <!-- Documentation statements -->
+    <statement-combo name="doc" style="doc-stmt">
+        <name-pattern>description|reference|status</name-pattern>
+        <argument type="ref" context="string" style="doc-comment"/>
+    </statement>
+    <statement-combo name="module-doc" style="doc-stmt">
+        <name-pattern>description|contact|organization|reference</name-pattern>
+        <argument type="ref" context="string" style="doc-comment"/>
+    </statement>
+    <statement name="units" style="doc-stmt" once-only="true">
+        <argument type="ref" context="string" style="doc-comment"/>
+    </statement>
+    <statement-combo name="error-msg" style="keyword2">
+        <name-pattern>error-message|error-app-tag</name-pattern>
+        <argument type="ref" context="string"/>
+    </statement>
+    
+    <!-- Type statements -->
+    <statement name="default" style="keyword2" once-only="true">
+        <argument type="ref" context="string"/>
+    </statement>
+    <statement name="typedef" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="type" mandatory="true"/>
+        <substatement name="units"/>
+        <substatement name="default"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="type" style="keyword2">
+        <argument type="multiple">
+            <argument type="ref" context="types"/>
+            <argument type="match" pattern="\%{identifier-with-ns}" style="special"/>
+        </argument>
+        <substatement name="type"/>
+        <substatement name="type-properties"/>
+    </statement>
+    <statement-combo name="type-properties" style="keyword2">
+        <name-pattern>base|bit|enum|length|path|pattern|range|require-instance</name-pattern>
+        <argument type="ref" context="string"/>
+        <substatement name="position"/>
+        <substatement name="error-msg"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="position" style="keyword2">
+        <argument type="match" pattern="\d+" style="number"/>
+    </statement>
+</yang-statements>
