@@ -164,54 +164,57 @@
         </include>
     </context>
 
-    <context id="include"><include> <!-- 7.1.6 -->
-        <context id="include-simple">
-            <match extended="true">\b(include)\s+(\%{identifier})\s*;</match>
-            <include>
-                <context sub-pattern="1" style-ref="keyword1"/>
-                <context sub-pattern="2" style-ref="special"/>
-            </include>
-        </context>
-        <context id="include-block">
-            <start extended="true">\b(include)\s+(\%{identifier})</start>
-            <end>}</end>
-            <include>
-                <context sub-pattern="1" where="start" style-ref="keyword1"/>
-                <context sub-pattern="2" where="start" style-ref="special"/>
-                <context ref="revision-date"/>
-                <context ref="common"/>
-            </include>
-        </context>
-    </include></context>
+    <context id="include"> <!-- 7.1.6 -->
+        <start extended="true">\binclude(?=\s+\%{identifier})</start><end>;|}</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="keyword1"/>
+            <context id="include-argument" style-ref="special">
+                <start>\%{identifier}</start><end>(?=;|{)</end>
+                <include><context ref="common"/></include>
+            </context>
+            <context id="include-substatements">
+                <start>{</start><end>(?=})</end>
+                <include>
+                    <context ref="revision-date"/>
+                    <context ref="common"/>
+                </include>
+            </context>
+        </include>
+    </context>
 
-    <context id="revision"><include> <!-- 7.1.9 -->
-        <context id="revision-simple">
-            <match extended="true">\b(revision)\s+(\%{date})\s*;</match>
-            <include>
-                <context sub-pattern="1" style-ref="keyword2"/>
-                <context sub-pattern="2" style-ref="number"/>
-            </include>
-        </context>
-        <context id="revision-block">
-            <start extended="true">\b(revision)\s+(\%{date})</start>
-            <end>}</end>
-            <include>
-                <context sub-pattern="1" where="start" style-ref="keyword2"/>
-                <context sub-pattern="2" where="start" style-ref="number"/>
-                <context ref="doc"/>
-                <context ref="common"/>
-            </include>
-        </context>
-    </include></context>
+    <context id="revision"> <!-- 7.1.9 -->
+        <start extended="true">\brevision(?=\s+\%{date})</start><end>;|}</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="keyword2"/>
+            <context id="revision-argument" style-ref="number">
+                <start>\%{date}</start><end>(?=;|{)</end>
+                <include><context ref="common"/></include>
+            </context>
+            <context id="revision-substatements">
+                <start>{</start><end>(?=})</end>
+                <include>
+                    <context ref="doc"/>
+                    <context ref="common"/>
+                </include>
+            </context>
+        </include>
+    </context>
 
     <context id="belongs-to"><!-- 7.2.2 -->
-        <start extended="true">\b(belongs-to)\s+(\%{identifier})</start>
-        <end>}</end>
+        <start extended="true">\bbelongs-to(?=\s+\%{identifier})</start><end>}</end>
         <include>
-            <context sub-pattern="1" where="start" style-ref="keyword2"/>
-            <context sub-pattern="2" where="start" style-ref="special"/>
-            <context ref="prefix"/>
-            <context ref="common"/>
+            <context sub-pattern="0" where="start" style-ref="keyword2"/>
+            <context id="belongs-to-argument" style-ref="special">
+                <start>\%{identifier}</start><end>(?={)</end>
+                <include><context ref="common"/></include>
+            </context>
+            <context id="belongs-to-substatements">
+                <start>{</start><end>(?=})</end>
+                <include>
+                    <context ref="prefix"/>
+                    <context ref="common"/>
+                </include>
+            </context>
         </include>
     </context>
     
@@ -242,34 +245,31 @@
         </include>
     </context>
 
-    <context id="type"><include> <!-- 7.4 -->
-        <context id="type-simple">
-            <start extended="true">\btype(?=\s+\%{identifier}\s*;)</start><end>;</end>
-            <include>
-                <context sub-pattern="0" where="start" style-ref="keyword2"/>
-                <context ref="types"/>
-            </include>
-        </context>
-        <context id="type-block">
-            <start extended="true">\btype(?=\s+\%{identifier})</start><end>}</end>
-            <include>
-                <context sub-pattern="0" where="start" style-ref="keyword2"/>
-                <context id="type-block-name" style-ref="special">
-                    <start>\s+</start><end>(?={)</end>
-                    <include><context ref="types"/></include>
-                </context>
-                <context id="type-block-substatements">
-                    <start>{</start><end>(?=})</end>
-                    <include>
-                        <context ref="type"/>
-                        <context ref="type-properties"/>
-                        <context ref="common"/>
-                    </include>
-                </context>
-                <context ref="common"/>
-            </include>
-        </context>
-    </include></context>
+    <context id="type"> <!-- 7.4 -->
+        <start extended="true">\btype(?=\s+\%{identifier-with-ns})</start><end>;|}</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="keyword2"/>
+            <context id="type-argument">
+                <start>\s+</start><end>(?=;|{)</end>
+                <include>
+                    <context ref="types"/>
+                    <context id="type-custom-name" style-ref="special">
+                        <match extended="true">\%{identifier-with-ns}</match>
+                    </context>
+                    <context ref="common"/>
+                </include>
+            </context>
+            <context id="type-substatements">
+                <start>{</start><end>(?=})</end>
+                <include>
+                    <context ref="type"/>
+                    <context ref="type-properties"/>
+                    <context ref="common"/>
+                </include>
+            </context>
+            <context ref="common"/>
+        </include>
+    </context>
 
     <context id="type-properties"><include> <!-- 9.x -->
         <context id="type-properties-simple">

@@ -15,6 +15,7 @@ module cpqd-x {
 
     include submodule;
     include submodule2
+    {
         revision-date 2014-02-04;
     }
 
