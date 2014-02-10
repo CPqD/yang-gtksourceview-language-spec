@@ -10,6 +10,22 @@
         <substatement name="revision"/>
         <substatement name="belongs-to"/>
         <substatement name="typedef"/>
+        <substatement name="anyxml"/>
+        <substatement name="augment"/>
+        <substatement name="choice"/>
+        <substatement name="container"/>
+        <substatement name="deviation"/>
+        <substatement name="extension"/>
+        <substatement name="feature"/>
+        <substatement name="grouping"/>
+        <substatement name="identity"/>
+        <substatement name="leaf-list"/>
+        <substatement name="leaf"/>
+        <substatement name="list"/>
+        <substatement name="notification"/>
+        <substatement name="rpc"/>
+        <substatement name="typedef"/>
+        <substatement name="uses"/>
         <substatement name="module-doc"/>
     </top-level>
     <statement name="yang-version" style="keyword2" once-only="true">
@@ -41,7 +57,7 @@
         <argument type="match" pattern="\%{identifier}" style="special"/>
         <substatement name="prefix" mandatory="true"/>
     </statement>
-    
+
     <!-- Documentation statements -->
     <statement name="doc" style="doc-stmt">
         <name-pattern>description|reference|status</name-pattern>
@@ -58,16 +74,19 @@
         <name-pattern>error-message|error-app-tag</name-pattern>
         <argument type="ref" context="string"/>
     </statement>
-    
+
     <!-- Type statements -->
+    <group name="type-common">
+        <substatement name="type"/>
+        <substatement name="units"/>
+        <substatement name="default"/>
+    </group>
     <statement name="default" style="keyword2" once-only="true">
         <argument type="ref" context="string"/>
     </statement>
     <statement name="typedef" style="keyword1">
         <argument type="match" pattern="\%{identifier}" style="special"/>
-        <substatement name="type" mandatory="true"/>
-        <substatement name="units"/>
-        <substatement name="default"/>
+        <substatement name="type-common" mandatory="true"/>
         <substatement name="doc"/>
     </statement>
     <statement name="type" style="keyword2">
@@ -82,10 +101,238 @@
         <name-pattern>base|bit|enum|length|path|pattern|range|require-instance</name-pattern>
         <argument type="ref" context="string"/>
         <substatement name="position"/>
+        <substatement name="value"/>
         <substatement name="error-msg"/>
         <substatement name="doc"/>
     </statement>
     <statement name="position" style="keyword2">
         <argument type="match" pattern="\d+" style="number"/>
+    </statement>
+    <statement name="value" style="keyword2">
+        <argument type="match" pattern="\d+" style="number"/>
+    </statement>
+
+    <!-- Node statements -->
+    <group name="data-node-common">
+        <substatement name="config"/>
+        <substatement name="if-feature"/>
+        <substatement name="when"/>
+        <substatement name="doc"/>
+    </group>
+    <group name="data-nodes">
+        <substatement name="anyxml"/>
+        <substatement name="container"/>
+        <substatement name="leaf-list"/>
+        <substatement name="leaf"/>
+        <substatement name="list"/>
+    </group>
+    <statement name="container" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="choice"/>
+        <substatement name="grouping"/>
+        <substatement name="must"/>
+        <substatement name="presence"/>
+        <substatement name="typedef"/>
+        <substatement name="uses"/>
+        <substatement name="data-nodes"/>
+        <substatement name="data-node-common"/>
+    </statement>
+    <statement name="leaf" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="mandatory"/>
+        <substatement name="must"/>
+        <substatement name="type-common" mandatory="true"/>
+        <substatement name="data-node-common"/>
+    </statement>
+    <statement name="leaf-list" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="min-max-elements"/>
+        <substatement name="must"/>
+        <substatement name="ordered-by"/>
+        <substatement name="type-common" mandatory="true"/>
+        <substatement name="data-node-common"/>
+    </statement>
+    <statement name="list" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="choice"/>
+        <substatement name="grouping"/>
+        <substatement name="key"/>
+        <substatement name="min-max-elements"/>
+        <substatement name="must"/>
+        <substatement name="ordered-by"/>
+        <substatement name="typedef"/>
+        <substatement name="unique"/>
+        <substatement name="uses"/>
+        <substatement name="data-nodes"/>
+        <substatement name="data-node-common"/>
+    </statement>
+    <statement name="choice" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="case"/>
+        <substatement name="default"/>
+        <substatement name="mandatory"/>
+        <substatement name="data-nodes"/>
+        <substatement name="data-node-common"/>
+    </statement>
+    <statement name="case" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="choice"/>
+        <substatement name="uses"/>
+        <substatement name="data-nodes"/>
+        <substatement name="data-node-common"/>
+    </statement>
+    <statement name="anyxml" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="mandatory"/>
+        <substatement name="must"/>
+        <substatement name="data-node-common"/>
+    </statement>
+    <statement name="grouping" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="choice"/>
+        <substatement name="grouping"/>
+        <substatement name="typedef"/>
+        <substatement name="uses"/>
+        <substatement name="data-nodes"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="uses" style="keyword1">
+        <argument type="match" pattern="\%{identifier-with-ns}" style="special"/>
+        <substatement name="augment"/>
+        <substatement name="refine"/>
+        <substatement name="if-feature"/>
+        <substatement name="when"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="rpc" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="grouping"/>
+        <substatement name="if-feature"/>
+        <substatement name="input-output" mandatory="true"/>
+        <substatement name="typedef"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="input-output" style="keyword1">
+        <name-pattern>input|output</name-pattern>
+        <substatement name="choice"/>
+        <substatement name="grouping"/>
+        <substatement name="typedef"/>
+        <substatement name="uses"/>
+        <substatement name="data-nodes"/>
+    </statement>
+    <statement name="notification" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="choice"/>
+        <substatement name="grouping"/>
+        <substatement name="if-feature"/>
+        <substatement name="typedef"/>
+        <substatement name="uses"/>
+        <substatement name="data-nodes"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="augment" style="keyword1">
+        <argument type="ref" context="string"/>
+        <substatement name="case"/>
+        <substatement name="choice"/>
+        <substatement name="grouping"/>
+        <substatement name="if-feature"/>
+        <substatement name="uses"/>
+        <substatement name="when"/>
+        <substatement name="data-nodes"/>
+        <substatement name="doc"/>
+    </statement>
+
+    <!-- Node properties -->
+    <statement name="must" style="keyword2">
+        <argument type="ref" context="string"/>
+        <substatement name="error-msg"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="presence" style="keyword2">
+        <argument type="ref" context="string"/>
+        <substatement name="error-msg"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="mandatory" style="keyword2">
+        <argument type="ref" context="boolean"/>
+    </statement>
+    <statement name="min-max-elements" style="keyword2">
+        <name-pattern>m(in|ax)-elements</name-pattern>
+        <argument type="match" pattern="(\d+)|unbounded" style="number"/>
+    </statement>
+    <statement name="ordered-by" style="keyword2">
+        <argument type="match" pattern="system|user" style="special"/>
+    </statement>
+    <statement name="key" style="keyword2">
+        <argument type="ref" context="string"/>
+    </statement>
+    <statement name="unique" style="keyword2">
+        <argument type="ref" context="string"/>
+    </statement>
+    <statement name="refine" style="keyword2">
+        <argument type="ref" context="string"/>
+        <substatement name="config"/>
+        <substatement name="mandatory"/>
+        <substatement name="min-max-elements"/>
+        <substatement name="must"/>
+        <substatement name="doc"/>
+    </statement>
+
+    <!-- Identities -->
+    <statement name="identity" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="base"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="base" style="keyword2">
+        <argument type="match" pattern="\%{identifier-with-ns}" style="special"/>
+    </statement>
+
+    <!-- Extensions -->
+    <statement name="extension" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="argument"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="argument" style="keyword2">
+        <argument type="ref" context="string"/>
+        <substatement name="yin-element"/>
+    </statement>
+    <statement name="yin-element" style="keyword2">
+        <argument type="ref" context="boolean"/>
+    </statement>
+
+    <!-- Features -->
+    <statement name="feature" style="keyword1">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="if-feature"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="if-feature" style="keyword2">
+        <argument type="match" pattern="\%{identifier-with-ns}" style="special"/>
+    </statement>
+
+    <!-- Deviations -->
+    <statement name="deviation" style="keyword1">
+        <argument type="ref" context="string"/>
+        <substatement name="deviate"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="deviate" style="keyword1">
+        <argument type="match" pattern="(not-supported|add|replace|delete)" style="special"/>
+        <substatement name="config"/>
+        <substatement name="mandatory"/>
+        <substatement name="min-max-elements"/>
+        <substatement name="must"/>
+        <substatement name="type-common" mandatory="true"/>
+        <substatement name="unique"/>
+    </statement>
+
+    <!-- Common statements -->
+    <statement name="config" style="keyword2">
+        <argument type="ref" context="boolean"/>
+    </statement>
+    <statement name="when" style="keyword2">
+        <argument type="ref" context="string"/>
     </statement>
 </yang-statements>

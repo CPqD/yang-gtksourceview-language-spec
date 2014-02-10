@@ -16,13 +16,15 @@
                 <context sub-pattern="0" where="start">
                     <xsl:attribute name="style-ref"><xsl:value-of select="@style"/></xsl:attribute>
                 </context>
-                <context>
-                    <xsl:attribute name="id"><xsl:value-of select="@name"/>-argument</xsl:attribute>
-                    <xsl:if test="yang:argument/@style">
-                        <xsl:attribute name="style-ref"><xsl:value-of select="yang:argument/@style"/></xsl:attribute>
-                    </xsl:if>
-                    <xsl:apply-templates select="yang:argument"/>
-                </context>
+                <xsl:if test="yang:argument">
+                    <context>
+                        <xsl:attribute name="id"><xsl:value-of select="@name"/>-argument</xsl:attribute>
+                        <xsl:if test="yang:argument/@style">
+                            <xsl:attribute name="style-ref"><xsl:value-of select="yang:argument/@style"/></xsl:attribute>
+                        </xsl:if>
+                        <xsl:apply-templates select="yang:argument"/>
+                    </context>
+                </xsl:if>
                 <context>
                     <xsl:attribute name="id"><xsl:value-of select="@name"/>-substatements</xsl:attribute>
                     <start>{</start><end>(?=})</end>
@@ -37,6 +39,15 @@
         </context>
     </xsl:template>
     
+    <xsl:template match="yang:group">
+        <context>
+            <xsl:attribute name="id"><xsl:value-of select="@name"/></xsl:attribute>
+            <include>
+                <xsl:apply-templates select="yang:substatement"/>
+            </include>
+        </context>
+    </xsl:template>
+
     <xsl:template match="yang:argument[@type='match']">
         <start extended="true"><xsl:value-of select="@pattern"/></start><end>(?=;|{)</end>
         <include>
@@ -121,10 +132,10 @@
         <start extended="true">\%{extension}</start><end>;|}</end>
         <include>
             <context sub-pattern="0" where="start" style-ref="keyword2"/>
-            <context id="extension-argument"><!-- no style for extension argument -->
+            <context id="extensions-argument"><!-- no style for extension argument -->
                 <start>\s+</start><end>(?=;|{)</end>
             </context>
-            <context id="extension-substatements">
+            <context id="extensions-substatements">
                 <start>{</start><end>(?=;|})</end>
                 <include>
                     <context ref="extensions"/>
@@ -177,6 +188,11 @@
         <keyword>instance-identifier</keyword>
     </context>
 
+    <context id="boolean" style-ref="special">
+        <keyword>false</keyword>
+        <keyword>true</keyword>
+    </context>
+
     <!-- Other contexts -->
     <context id="wserror" style-ref="error">
         <match>\s+$</match>
@@ -210,7 +226,7 @@
     </context>
     
     <!-- Other statements -->
-    <xsl:apply-templates select="yang:statement"/>
+    <xsl:apply-templates select="yang:statement|yang:group"/>
 
     <!-- Main context -->
     <context id="yang" class="no-spell-check">
