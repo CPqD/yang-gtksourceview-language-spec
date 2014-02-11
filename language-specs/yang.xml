@@ -95,18 +95,28 @@
             <argument type="match" pattern="\%{identifier-with-ns}" style="special"/>
         </argument>
         <substatement name="type"/>
-        <substatement name="type-properties"/>
+        <substatement name="bit"/>
+        <substatement name="enum"/>
+        <substatement name="other-type-properties"/>
     </statement>
-    <statement name="type-properties" style="keyword2">
-        <name-pattern>base|bit|enum|length|path|pattern|range|require-instance</name-pattern>
+    <statement name="other-type-properties" style="keyword2">
+        <name-pattern>base|length|path|pattern|range|require-instance</name-pattern>
         <argument type="ref" context="string"/>
-        <substatement name="position"/>
-        <substatement name="value"/>
         <substatement name="error-msg"/>
+        <substatement name="doc"/>
+    </statement>
+    <statement name="bit" style="keyword2">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="position"/>
         <substatement name="doc"/>
     </statement>
     <statement name="position" style="keyword2">
         <argument type="match" pattern="\d+" style="number"/>
+    </statement>
+    <statement name="enum" style="keyword2">
+        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <substatement name="value"/>
+        <substatement name="doc"/>
     </statement>
     <statement name="value" style="keyword2">
         <argument type="match" pattern="\d+" style="number"/>
