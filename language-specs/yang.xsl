@@ -80,10 +80,6 @@
                     <xsl:otherwise><ERROR/></xsl:otherwise>
                 </xsl:choose>
             </xsl:for-each>
-            <context ref="types"/>
-            <context id="type-custom-name" style-ref="special">
-                <match extended="true">\%{identifier-with-ns}</match>
-            </context>
             <context ref="common"/>
         </include>
     </xsl:template>
@@ -138,7 +134,24 @@
             <context id="extensions-substatements">
                 <start>{</start><end>(?=;|})</end>
                 <include>
-                    <context ref="extensions"/>
+                    <context ref="any-statement"/>
+                    <context ref="common"/>
+                </include>
+            </context>
+            <context ref="common"/>
+        </include>
+    </context>
+    <context id="any-statement">
+        <start extended="true">\%{identifier-with-ns}</start><end>;|}</end>
+        <include>
+            <context sub-pattern="0" where="start" style-ref="keyword2"/>
+            <context id="any-statement-argument"><!-- no style for argument -->
+                <start>\s+</start><end>(?=;|{)</end>
+            </context>
+            <context id="any-statement-substatements">
+                <start>{</start><end>(?=;|})</end>
+                <include>
+                    <context ref="any-statement"/>
                     <context ref="common"/>
                 </include>
             </context>
