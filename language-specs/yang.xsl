@@ -31,6 +31,7 @@
                     <include>
                         <xsl:apply-templates select="yang:substatement"/>
                         <context ref="extensions"/>
+                        <context ref="bracket-error"/>
                         <context ref="common"/>
                     </include>
                 </context>
@@ -135,6 +136,7 @@
                 <start>{</start><end>(?=;|})</end>
                 <include>
                     <context ref="any-statement"/>
+                    <context ref="bracket-error"/>
                     <context ref="common"/>
                 </include>
             </context>
@@ -152,6 +154,7 @@
                 <start>{</start><end>(?=;|})</end>
                 <include>
                     <context ref="any-statement"/>
+                    <context ref="bracket-error"/>
                     <context ref="common"/>
                 </include>
             </context>
@@ -214,6 +217,13 @@
     <context id="stmt-error" style-ref="error">
         <match extended="true">\%{identifier-with-ns}</match>
     </context>
+    <context id="bracket-error" style-ref="error">
+        <start>{</start><end>}</end>
+        <include>
+            <context ref="bracket-error"/>
+            <context ref="common"/>
+        </include>
+    </context>
 
     <context id="common">
         <include>
@@ -226,14 +236,22 @@
     </context>
     
     <!-- Top-level statements -->
-    <context id="module" once-only="true"> <!-- 7.1, 7.2 -->
-        <start extended="true">\b(module|submodule)\s+(\%{identifier})</start>
-        <end>}</end>
+    <context id="module">
+        <start>\b(module|submodule)\b</start><end>}</end>
         <include>
-            <context sub-pattern="1" where="start" style-ref="keyword1"/>
-            <context sub-pattern="2" where="start" style-ref="special"/>
-            <xsl:apply-templates select="yang:top-level/yang:substatement"/>
-            <context ref="extensions"/>
+            <context sub-pattern="0" where="start" style-ref="keyword1"/>
+            <context id="module-name" style-ref="special">
+                <start extended="true">\%{identifier}</start><end>(?={)</end>
+            </context>
+            <context id="module-statements">
+                <start>{</start><end>(?=})</end>
+                <include>
+                    <xsl:apply-templates select="yang:top-level/yang:substatement"/>
+                    <context ref="extensions"/>
+                    <context ref="bracket-error"/>
+                    <context ref="common"/>
+                </include>
+            </context>
             <context ref="common"/>
         </include>
     </context>
