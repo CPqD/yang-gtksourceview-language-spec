@@ -188,6 +188,31 @@
             <context ref="wserror"/>
         </include>
     </context>
+    <context id="doc-string">
+        <include>
+            <context id="single-quoted-doc-string" style-ref="doc-comment">
+                <start>'</start><end>'</end>
+                <include><context ref="def:in-comment"/></include>
+            </context>
+            <context id="double-quoted-doc-string" style-ref="doc-comment">
+                <start>"</start><end>(?&lt;!\\)"</end>
+                <include><context ref="def:in-comment"/></include>
+            </context>
+            <context id="unquoted-doc-string" style-ref="doc-comment">
+                <match extended="true">[^'";{}+\s]+(\s+[^+;{])?</match>
+                <include>
+                    <context sub-pattern="1" style-ref="error"/>
+                </include>
+            </context>
+            <context id="concat-doc-string" style-ref="operator">
+                <match>\+</match>
+            </context>
+            <context ref="def:c-like-comment"/>
+            <context ref="def:c-like-comment-multiline"/>
+            <context ref="def:c-like-close-comment-outside-comment"/>
+            <context ref="wserror"/>
+        </include>
+    </context>
 
     <context id="types" style-ref="type">
         <keyword>(u)?int(8|16|32|64)</keyword>

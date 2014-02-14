@@ -61,14 +61,14 @@
     <!-- Documentation statements -->
     <statement name="doc" style="doc-stmt">
         <name-pattern>description|reference|status</name-pattern>
-        <argument type="ref" context="string" style="doc-comment"/>
+        <argument type="ref" context="doc-string" style="doc-comment"/>
     </statement>
     <statement name="module-doc" style="doc-stmt">
         <name-pattern>description|contact|organization|reference</name-pattern>
-        <argument type="ref" context="string" style="doc-comment"/>
+        <argument type="ref" context="doc-string" style="doc-comment"/>
     </statement>
     <statement name="units" style="doc-stmt" once-only="true">
-        <argument type="ref" context="string" style="doc-comment"/>
+        <argument type="ref" context="doc-string" style="doc-comment"/>
     </statement>
     <statement name="error-msg" style="keyword2">
         <name-pattern>error-message|error-app-tag</name-pattern>
