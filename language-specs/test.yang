@@ -29,7 +29,7 @@ module cpqd-x {
             enum um {
                 value 1;
             }
-            enum dois;
+            enum "dois ou três";
         }
     }
 

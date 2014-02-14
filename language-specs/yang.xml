@@ -114,7 +114,7 @@
         <argument type="match" pattern="\d+" style="number"/>
     </statement>
     <statement name="enum" style="keyword2">
-        <argument type="match" pattern="\%{identifier}" style="special"/>
+        <argument type="ref" context="string"/>
         <substatement name="value"/>
         <substatement name="doc"/>
     </statement>
