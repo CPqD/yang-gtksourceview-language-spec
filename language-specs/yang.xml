@@ -100,7 +100,7 @@
         <substatement name="other-type-properties"/>
     </statement>
     <statement name="other-type-properties" style="keyword2">
-        <name-pattern>base|length|path|pattern|range|require-instance</name-pattern>
+        <name-pattern>base|fraction-digits|length|path|pattern|range|require-instance</name-pattern>
         <argument type="ref" context="string"/>
         <substatement name="error-msg"/>
         <substatement name="doc"/>
